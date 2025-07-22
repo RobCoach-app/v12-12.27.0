@@ -1,0 +1,14 @@
+name: Close Issues
+on:
+  release:
+    types: [published]
+
+jobs:
+  close_issues:
+    name: Close issues mentioned in pull requests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PR Issues
+        uses: botpress/gh-actions/close_pull_request_issues@v2
+        with:
+          comment: Available on ${{ github.event.release.tag_name }}
