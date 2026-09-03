@@ -68,7 +68,7 @@ async function zipFiles(modulePath, outPath) {
     cwd: modulePath,
     nodir: true,
     dot: true,
-    ignore: ['node_modules/**', 'src/**']
+    ignore: ['node_modules/**', 'src/**', '.git/**', '**/.git/**']
   })
 
   debug(`Zipping ${files.length} file${files.length === 1 ? '' : 's'}...`)

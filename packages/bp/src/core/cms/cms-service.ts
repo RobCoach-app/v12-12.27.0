@@ -467,29 +467,29 @@ export class CMSService implements IDisposeOnExit {
     for (const contentType of this.contentTypes) {
       let elementId
       try {
-        await this.memDb(this.contentTable)
+        const elements = await this.memDb(this.contentTable)
           .select('id', 'formData', 'botId')
           .where('contentType', contentType.id)
           .andWhere({ botId })
-          .then<Iterable<any>>()
-          .each(async (element: any) => {
-            elementId = element.id
-            const computedProps = await this.fillComputedProps(
-              contentType,
-              JSON.parse(element.formData),
-              languages,
-              defaultLanguage
-            )
-            element = { ...element, ...computedProps }
 
-            return this.memDb(this.contentTable)
-              .where('id', element.id)
-              .andWhere({ botId })
-              .update(this.transformItemApiToDb(botId, element))
-              .catch(err => {
-                throw new VError(err, `Could not update the element for ID "${element.id}"`)
-              })
-          })
+        for (const element of elements) {
+          elementId = element.id
+          const computedProps = await this.fillComputedProps(
+            contentType,
+            JSON.parse(element.formData),
+            languages,
+            defaultLanguage
+          )
+          const updatedElement = { ...element, ...computedProps }
+
+          await this.memDb(this.contentTable)
+            .where('id', updatedElement.id)
+            .andWhere({ botId })
+            .update(this.transformItemApiToDb(botId, updatedElement))
+            .catch(err => {
+              throw new VError(err, `Could not update the element for ID "${updatedElement.id}"`)
+            })
+        }
       } catch (err) {
         throw new Error(`while computing elements of type "${contentType.id}" (element: ${elementId}): ${err}`)
       }
